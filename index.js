@@ -18,7 +18,32 @@ app.get('/', (req, res) => {
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.yu5z2.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
 
-console.log(uri)
+
+
+async function server() {
+    try {
+        await client.connect();
+        const database = client.db("foodota");
+        const foodCollection = database.collection('foods')
+
+        app.get('/foods', async (req, res) => {
+            const query = {};
+            const food = foodCollection.find(query);
+            const foods = await food.toArray();
+            res.send(foods)
+            console.log('foods length', foods.length)
+        })
+
+    }
+    finally {
+        // await client.close();
+
+    }
+}
+
+server().catch(console.dir)
+
+
 
 app.listen(port, () => {
     console.log('inside ', port)
