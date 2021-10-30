@@ -89,6 +89,26 @@ async function server() {
             res.send(result)
         })
 
+        // POST API FOR RESTAURANT
+
+        app.post('/add/sellMeal', async (req, res) => {
+            const newItems = req.body;
+            const result = await foodCollection.insertOne(newItems);
+            res.send(result);
+        })
+
+        // UPDATE API FOR UPDATE STATUS:
+
+        app.patch('/food/status', async (req, res) => {
+            const foodId = req.body.id;
+            const filter = { _id: ObjectId(foodId) };
+
+
+            const updatedValue = { $set: { "food.status": 'Approved' } }
+            const result = await orderCollection.updateOne(filter, updatedValue);
+            res.send(result);
+        })
+
     }
     finally {
         // await client.close();
