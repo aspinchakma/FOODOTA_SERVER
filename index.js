@@ -26,22 +26,67 @@ async function server() {
     try {
         await client.connect();
         const database = client.db("foodota");
-        const foodCollection = database.collection('foods')
+        const foodCollection = database.collection('foods');
+        const orderCollection = database.collection('orders');
 
+        // GET API FOR SHOW ALL FOODS ITEMS
         app.get('/foods', async (req, res) => {
             const query = {};
             const food = foodCollection.find(query);
             const foods = await food.toArray();
             res.send(foods)
-            console.log('foods length', foods.length)
-        })
 
+        })
+        // GET API FOR DETAILS BY ID
         app.get('/food/details/:id', async (req, res) => {
             const foodId = req.params.id;
             const query = { _id: ObjectId(foodId) };
             const foodDetails = await foodCollection.findOne(query);
             res.send(foodDetails)
 
+        })
+        //POST API FOR ORDER:
+        app.post('/food/order', async (req, res) => {
+            const order = req.body;
+            const result = await orderCollection.insertOne(order);
+            res.send(result);
+        })
+
+        // GET API FOR MANAGE MY ORDER
+        app.get('/myOrder/:email', async (req, res) => {
+            const email = req.params.email;
+            const query = { email: email };
+            const food = orderCollection.find(query);
+            const myOrder = await food.toArray();
+            res.send(myOrder)
+        })
+
+
+        // DELETE API FROM MY ORDER
+        app.delete('/myOrder/deleteDetail', async (req, res) => {
+            const deleteDetails = req.body;
+            const { email, id } = deleteDetails;
+            const query = { _id: ObjectId(id), email: email };
+            const result = await orderCollection.deleteOne(query);
+            console.log(result);
+            res.send(result)
+        })
+
+        //GET API FOR MANAGE ALL 
+        app.get('/manageAll', async (req, res) => {
+            const query = {};
+            const food = orderCollection.find(query);
+            const orderedFoods = await food.toArray();
+            res.send(orderedFoods)
+        })
+
+
+        // DELETE API FOR MANAGE ALL ITEMS
+
+        app.delete('/manageAll/deleteDetails', async (req, res) => {
+            const query = { _id: ObjectId(req.body.id) };
+            const result = await orderCollection.deleteOne(query);
+            res.send(result)
         })
 
     }
